@@ -43,7 +43,8 @@ _load_time_series:_
 
 ### 2. Dimensionality Reduction
 
-```
+```python
+
 class AutoEncoder(nn.Module):
     def __init__(self, input_dim, encoding_dim):
         super(AutoEncoder, self).__init__()
@@ -63,13 +64,13 @@ class AutoEncoder(nn.Module):
             nn.Linear(input_dim*3, input_dim),
             nn.Sigmoid()
         )
+```
 
 Class AutoEncoder:
+
 - Reduces high dimensional data into smaller latent features that retains important patterns
 
-
-
-```
+```python
 
 def perform_autoencoder(df, encoding_dim=50, epochs=50, batch_size=32):
 scaler = StandardScaler()
@@ -102,39 +103,45 @@ df_scaled = scaler.fit_transform(df)
 
     return df_encoded
 
+```
+
 perform_autoencoder
 
 - Use StandartScaler to normalize the input features
 - The autoencoder model is created based on thr input dimensions
 - After training using Mean-Squared Error, the data is passed through the encoder to compress latent data
 
-def feature_engineering(df):
-season_cols = [col for col in df.columns if 'Season' in col]
-df = df.drop(season_cols, axis=1)
-df['BMI_Age'] = df['Physical-BMI'] _ df['Basic_Demos-Age']
-df['Internet_Hours_Age'] = df['PreInt_EduHx-computerinternet_hoursday'] _ df['Basic_Demos-Age']
-df['BMI_Internet_Hours'] = df['Physical-BMI'] _ df['PreInt_EduHx-computerinternet_hoursday']
-df['BFP_BMI'] = df['BIA-BIA_Fat'] / df['BIA-BIA_BMI']
-df['FFMI_BFP'] = df['BIA-BIA_FFMI'] / df['BIA-BIA_Fat']
-df['FMI_BFP'] = df['BIA-BIA_FMI'] / df['BIA-BIA_Fat']
-df['LST_TBW'] = df['BIA-BIA_LST'] / df['BIA-BIA_TBW']
-df['BFP_BMR'] = df['BIA-BIA_Fat'] _ df['BIA-BIA_BMR']
-df['BFP_DEE'] = df['BIA-BIA_Fat'] _ df['BIA-BIA_DEE']
-df['BMR_Weight'] = df['BIA-BIA_BMR'] / df['Physical-Weight']
-df['DEE_Weight'] = df['BIA-BIA_DEE'] / df['Physical-Weight']
-df['SMM_Height'] = df['BIA-BIA_SMM'] / df['Physical-Height']
-df['Muscle_to_Fat'] = df['BIA-BIA_SMM'] / df['BIA-BIA_FMI']
-df['Hydration_Status'] = df['BIA-BIA_TBW'] / df['Physical-Weight']
-df['ICW_TBW'] = df['BIA-BIA_ICW'] / df['BIA-BIA_TBW']
-df['BMI_PHR'] = df['Physical-BMI'] _ df['Physical-HeartRate']
-df['SDS_InternetHours'] = df['SDS-SDS_Total_T'] \* df['PreInt_EduHx-computerinternet_hoursday']
+```python
 
+def feature_engineering(df):
+    season_cols = [col for col in df.columns if 'Season' in col]
+    df = df.drop(season_cols, axis=1)
+    df['BMI_Age'] = df['Physical-BMI'] _ df['Basic_Demos-Age']
+    df['Internet_Hours_Age'] = df['PreInt_EduHx-computerinternet_hoursday'] _ df['Basic_Demos-Age']
+    df['BMI_Internet_Hours'] = df['Physical-BMI'] _ df['PreInt_EduHx-computerinternet_hoursday']
+    df['BFP_BMI'] = df['BIA-BIA_Fat'] / df['BIA-BIA_BMI']
+    df['FFMI_BFP'] = df['BIA-BIA_FFMI'] / df['BIA-BIA_Fat']
+    df['FMI_BFP'] = df['BIA-BIA_FMI'] / df['BIA-BIA_Fat']
+    df['LST_TBW'] = df['BIA-BIA_LST'] / df['BIA-BIA_TBW']
+    df['BFP_BMR'] = df['BIA-BIA_Fat'] _ df['BIA-BIA_BMR']
+    df['BFP_DEE'] = df['BIA-BIA_Fat'] _ df['BIA-BIA_DEE']
+    df['BMR_Weight'] = df['BIA-BIA_BMR'] / df['Physical-Weight']
+    df['DEE_Weight'] = df['BIA-BIA_DEE'] / df['Physical-Weight']
+    df['SMM_Height'] = df['BIA-BIA_SMM'] / df['Physical-Height']
+    df['Muscle_to_Fat'] = df['BIA-BIA_SMM'] / df['BIA-BIA_FMI']
+    df['Hydration_Status'] = df['BIA-BIA_TBW'] / df['Physical-Weight']
+    df['ICW_TBW'] = df['BIA-BIA_ICW'] / df['BIA-BIA_TBW']
+    df['BMI_PHR'] = df['Physical-BMI'] _ df['Physical-HeartRate']
+    df['SDS_InternetHours'] = df['SDS-SDS_Total_T'] \* df['PreInt_EduHx-computerinternet_hoursday']`
     return df
+```
 
 feature_engineering
 
 - Drop feature about seasons due to four seasons being similar
 - Combining existing features, creating new features
+
+```python
 
 train = pd.read_csv('/kaggle/input/child-mind-institute-problematic-internet-use/train.csv')
 test = pd.read_csv('/kaggle/input/child-mind-institute-problematic-internet-use/test.csv')
@@ -156,12 +163,15 @@ test_ts_encoded['id']=test_ts["id"]
 train = pd.merge(train, train_ts_encoded, how="left", on='id')
 test = pd.merge(test, test_ts_encoded, how="left", on='id')
 
+```
+
 - Read files from the inut
 - Load time series from the series_train.parquet file
 - Drop id features from input
 - Perform autoencoder on the time series in order to reduce dimensionality
 - Merge time series into training
 
+```python
 imputer = KNNImputer(n_neighbors=5)
 numeric_cols = train.select_dtypes(include=['int32', 'int64', 'float64', 'int64']).columns
 imputed_data = imputer.fit_transform(train[numeric_cols])
@@ -177,8 +187,11 @@ train = feature_engineering(train)
 train = train.dropna(thresh=10, axis=0)
 test = feature_engineering(test)
 
+```
+
 - Handling missing data by using KNNImputer
 
+```python
 featuresCols = ['Basic_Demos-Age', 'Basic_Demos-Sex',
 'CGAS-CGAS_Score', 'Physical-BMI',
 'Physical-Height', 'Physical-Weight', 'Physical-Waist_Circumference',
@@ -203,17 +216,23 @@ featuresCols = ['Basic_Demos-Age', 'Basic_Demos-Sex',
 featuresCols += time_series_cols
 test = test[featuresCols]
 
+```
+
 - Add time series data into features data
 
+```python
 def update(df):
-global cat_c
-for c in cat_c:
-df[c] = df[c].fillna('Missing')
-df[c] = df[c].astype('category')
-return df
+    global cat_c
+    for c in cat_c:
+        df[c] = df[c].fillna('Missing')
+        df[c] = df[c].astype('category')
+    return df
+
+```
 
 - Mark missing features and their respective category
 
+```python
 train = pd.read_csv('/kaggle/input/child-mind-institute-problematic-internet-use/train.csv')
 test = pd.read_csv('/kaggle/input/child-mind-institute-problematic-internet-use/test.csv')
 sample = pd.read_csv('/kaggle/input/child-mind-institute-problematic-internet-use/sample_submission.csv')
@@ -277,37 +296,37 @@ cat_c = ['Basic_Demos-Enroll_Season', 'CGAS-Season', 'Physical-Season',
 'PAQ_A-Season', 'PAQ_C-Season', 'SDS-Season', 'PreInt_EduHx-Season']
 
 def update(df):
-global cat_c
-for c in cat_c:
-df[c] = df[c].fillna('Missing')
-df[c] = df[c].astype('category')
-return df
+    global cat_c
+    for c in cat_c:
+        df[c] = df[c].fillna('Missing')
+        df[c] = df[c].astype('category')
+    return df
 
 train = update(train)
 test = update(test)
 
 def create_mapping(column, dataset):
-unique_values = dataset[column].unique()
-return {value: idx for idx, value in enumerate(unique_values)}
+    unique_values = dataset[column].unique()
+    return {value: idx for idx, value in enumerate(unique_values)}
 
 for col in cat_c:
-mapping = create_mapping(col, train)
-mappingTe = create_mapping(col, test)
+    mapping = create_mapping(col, train)
+    mappingTe = create_mapping(col, test)
 
     train[col] = train[col].replace(mapping).astype(int)
     test[col] = test[col].replace(mappingTe).astype(int)
 
 def quadratic_weighted_kappa(y_true, y_pred):
-return cohen_kappa_score(y_true, y_pred, weights='quadratic')
+    return cohen_kappa_score(y_true, y_pred, weights='quadratic')
 
 def threshold_Rounder(oof_non_rounded, thresholds):
-return np.where(oof_non_rounded < thresholds[0], 0,
-np.where(oof_non_rounded < thresholds[1], 1,
-np.where(oof_non_rounded < thresholds[2], 2, 3)))
+    return np.where(oof_non_rounded < thresholds[0], 0,
+        np.where(oof_non_rounded < thresholds[1], 1,
+        np.where(oof_non_rounded < thresholds[2], 2, 3)))
 
 def evaluate_predictions(thresholds, y_true, oof_non_rounded):
-rounded_p = threshold_Rounder(oof_non_rounded, thresholds)
-return -quadratic_weighted_kappa(y_true, rounded_p)
+    rounded_p = threshold_Rounder(oof_non_rounded, thresholds)
+    return -quadratic_weighted_kappa(y_true, rounded_p)
 
 def TrainML(model_class, test_data):
 X = train.drop(['sii'], axis=1)
@@ -385,6 +404,8 @@ Params = {
 Light = LGBMRegressor(\*\*Params, random_state=SEED, verbose=-1, n_estimators=300)
 submission = TrainML(Light,test)
 
+```
+
 TrainML
 
 - Split the data into features X and target Y
@@ -397,4 +418,3 @@ TrainML
 
 - Define hyperparameter for the LGBM model with specific parameters
 - Training the model using TrainML function with the LightBGM model and test data to generate predictions and create submissions
--
